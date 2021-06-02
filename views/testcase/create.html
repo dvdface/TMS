@@ -1,0 +1,86 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+  integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+<style>
+  .form-control::placeholder {
+    color: lightgray;
+    opacity: 1;
+    font-size: xx-small
+  }
+</style>
+
+<form action="./create" method="POST" enctype="multipart/form-data">
+  <div class="form-group">
+    <label for="feature">所属特性</label>
+    <input name="feature" type="text" class="form-control" id="feature" list="featurelist" placeholder="用例所属特性">
+  </div>
+  <div class="form-group">
+    <label for="stage">执行阶段</label>
+    <input name="stage" type="text" class="form-control" id="stage" list="stagelist" placeholder="用例的执行阶段">
+  </div>
+  <div class="form-group">
+    <label for="quality">质量属性</label>
+    <input name="quality" type="text" class="form-control" id="quality" list="qualitylist" placeholder="所验证的质量属性">
+  </div>
+  <div class="form-group">
+    <label for="level">用例级别</label>
+    <input type="text" class="form-control" id="level" list="levellist" placeholder="用例重要性级别">
+  </div>
+  <div class="form-group">
+    <label for="title">用例标题</label>
+    <input name="title" type="text" class="form-control" id="title" placeholder="标题应能清晰表达测试目的和关键测试要素">
+  </div>
+  <div class="form-group">
+    <label for="content">用例描述</label>
+    <textarea name="content"  class="form-control" id="content" rows="12" 
+      placeholder="用例内容应当采用Given-When-Then格式进行描述:&#10;&#10;Given 给定条件1&#10;&#x09;And 给定条件2&#10;When 执行操作1&#10;&#x09;And 执行操作2&#10;Then 预期结果1 &#10;&#x09;And 预期结果2&#10;&#10;参数A    |    参数B&#10;值1        |    值2&#10;值3        |    值4&#10;&#10;GWT用例格式详细介绍请参考: https://www.agilealliance.org/glossary/gwt/"></textarea>
+  </div>
+  <div class="form-group">
+    <label for="attachment">相关附件</label>
+    <input name="attachment" type="file"  class="form-horizontal" id="attachment" multiple>
+  </div>
+  <button type="submit" class="btn btn-primary">保存</button>
+</form>
+
+<datalist id="featurelist">
+  　　<option>ONU QinQ</option>
+  　　<option>OLT QinQ</option>
+</datalist>
+
+<datalist id="stagelist">
+  　　<option>BBVF (Building Block Functional Validation)</option>
+  　　<option>SDV (System Design Verification)</option>
+  　　<option>SIT (System Integration Test)</option>
+  　　<option>SVT (System Verification Test)</option>
+</datalist>
+
+<datalist id="levellist">
+  　　<option>Level 0</option>
+  　　<option>Level 1</option>
+  　　<option>Level 2</option>
+  　　<option>Level 3</option>
+  　　<option>Level 4</option>
+</datalist>
+
+<datalist id="qualitylist">
+  <option>Functionality-Suitability</option>
+  <option>Functionality-Accuracy</option>
+  <option>Functionality-Interoperability</option>
+  <option>Functionality-Compliance</option>
+  <option>Functionality-Security</option>
+  <option>Reliability-Maturity</option>
+  <option>Reliability-Fault Tolerance</option>
+  <option>Reliability-Recoverability</option>
+  <option>Usability-Understandability</option>
+  <option>Usability-Learnability</option>
+  <option>Usability-Operability</option>
+  <option>Efficiency-Time Behaviour</option>
+  <option>Efficiency-Resource Behaviour</option>
+  <option>Maintainability-Analysability</option>
+  <option>Maintainability-Changeability</option>
+  <option>Maintainability-Stability</option>
+  <option>Maintainability-Testability</option>
+  <option>Portability-Adaptability</option>
+  <option>Portability-Installability</option>
+  <option>Portability-Conformance</option>
+  <option>Portability-Replaceability</option>
+</datalist>

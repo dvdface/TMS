@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-
+var multer  = require('multer')
+var upload = multer({dest: 'uploads/'})
 
 // 默认跳转create页面
 router.get('/', (req, res)=>{
@@ -9,13 +10,15 @@ router.get('/', (req, res)=>{
 
 // 用例创建页面
 router.get('/create', (req, res)=>{
-    res.send('show testcase create page')
+    res.render('testcase/create')
 })
 
 
 // 创建用例
-router.post('/create', (req, res)=>{
-    res.send('create testcase')
+router.post('/create', upload.any(), (req, res)=>{
+    console.log(req.files)
+    console.log(req.body)
+    res.send(req.body + req.files)
 })
 
 
@@ -56,8 +59,5 @@ router.get('/run', (req, res)=>{
 router.post('/run', (req, res)=>{
     res.send('submit testcase result')
 })
-
-
-
 
 module.exports = router

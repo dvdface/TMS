@@ -10,8 +10,9 @@ var testcaseRouter = require('./routes/testcase');
 var app = express();
 
 // view engine setup
+app.engine('.html', require('express-art-template'))
+app.set('view engine', 'html');
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
 app.use(express.json());
