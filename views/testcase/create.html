@@ -12,18 +12,59 @@
   <div class="form-group">
     <label for="feature">所属特性</label>
     <input name="feature" type="text" class="form-control" id="feature" list="featurelist" placeholder="用例所属特性">
+    <datalist id="featurelist">
+      　　<option>ONU QinQ</option>
+      　　<option>OLT QinQ</option>
+    </datalist>
+    
   </div>
   <div class="form-group">
     <label for="stage">执行阶段</label>
     <input name="stage" type="text" class="form-control" id="stage" list="stagelist" placeholder="用例的执行阶段">
+    <datalist id="stagelist">
+      　　<option>BBVF (Building Block Functional Validation)</option>
+      　　<option>SDV (System Design Verification)</option>
+      　　<option>SIT (System Integration Test)</option>
+      　　<option>SVT (System Verification Test)</option>
+    </datalist>
   </div>
   <div class="form-group">
     <label for="quality">质量属性</label>
     <input name="quality" type="text" class="form-control" id="quality" list="qualitylist" placeholder="所验证的质量属性">
+    <datalist id="qualitylist">
+      <option>Functionality-Suitability</option>
+      <option>Functionality-Accuracy</option>
+      <option>Functionality-Interoperability</option>
+      <option>Functionality-Compliance</option>
+      <option>Functionality-Security</option>
+      <option>Reliability-Maturity</option>
+      <option>Reliability-Fault Tolerance</option>
+      <option>Reliability-Recoverability</option>
+      <option>Usability-Understandability</option>
+      <option>Usability-Learnability</option>
+      <option>Usability-Operability</option>
+      <option>Efficiency-Time Behaviour</option>
+      <option>Efficiency-Resource Behaviour</option>
+      <option>Maintainability-Analysability</option>
+      <option>Maintainability-Changeability</option>
+      <option>Maintainability-Stability</option>
+      <option>Maintainability-Testability</option>
+      <option>Portability-Adaptability</option>
+      <option>Portability-Installability</option>
+      <option>Portability-Conformance</option>
+      <option>Portability-Replaceability</option>
+    </datalist>
   </div>
   <div class="form-group">
     <label for="level">用例级别</label>
     <input type="text" class="form-control" id="level" list="levellist" placeholder="用例重要性级别">
+    <datalist id="levellist">
+      　　<option>Level 0</option>
+      　　<option>Level 1</option>
+      　　<option>Level 2</option>
+      　　<option>Level 3</option>
+      　　<option>Level 4</option>
+    </datalist>
   </div>
   <div class="form-group">
     <label for="title">用例标题</label>
@@ -41,46 +82,6 @@
   <button type="submit" class="btn btn-primary">保存</button>
 </form>
 
-<datalist id="featurelist">
-  　　<option>ONU QinQ</option>
-  　　<option>OLT QinQ</option>
-</datalist>
 
-<datalist id="stagelist">
-  　　<option>BBVF (Building Block Functional Validation)</option>
-  　　<option>SDV (System Design Verification)</option>
-  　　<option>SIT (System Integration Test)</option>
-  　　<option>SVT (System Verification Test)</option>
-</datalist>
 
-<datalist id="levellist">
-  　　<option>Level 0</option>
-  　　<option>Level 1</option>
-  　　<option>Level 2</option>
-  　　<option>Level 3</option>
-  　　<option>Level 4</option>
-</datalist>
 
-<datalist id="qualitylist">
-  <option>Functionality-Suitability</option>
-  <option>Functionality-Accuracy</option>
-  <option>Functionality-Interoperability</option>
-  <option>Functionality-Compliance</option>
-  <option>Functionality-Security</option>
-  <option>Reliability-Maturity</option>
-  <option>Reliability-Fault Tolerance</option>
-  <option>Reliability-Recoverability</option>
-  <option>Usability-Understandability</option>
-  <option>Usability-Learnability</option>
-  <option>Usability-Operability</option>
-  <option>Efficiency-Time Behaviour</option>
-  <option>Efficiency-Resource Behaviour</option>
-  <option>Maintainability-Analysability</option>
-  <option>Maintainability-Changeability</option>
-  <option>Maintainability-Stability</option>
-  <option>Maintainability-Testability</option>
-  <option>Portability-Adaptability</option>
-  <option>Portability-Installability</option>
-  <option>Portability-Conformance</option>
-  <option>Portability-Replaceability</option>
-</datalist>

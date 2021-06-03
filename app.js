@@ -3,14 +3,14 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+var art_template = require('express-art-template');
 
 var testcaseRouter = require('./routes/testcase');
 
 var app = express();
 
 // view engine setup
-app.engine('.html', require('express-art-template'))
+app.engine('html', art_template);
 app.set('view engine', 'html');
 app.set('views', path.join(__dirname, 'views'));
 
