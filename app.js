@@ -1,11 +1,18 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var art_template = require('express-art-template');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const art_template = require('express-art-template');
+const mongo = require('mongoose')
+const config = require('./model/config')
+const featureRouter = require('./routes/feature');
 
-var testcaseRouter = require('./routes/testcase');
+mongo.connect(config.db.url)
+const db = mongo.connection
+db.on('error', () => { console.error('connect db failed~')})
+db.on('open', () => { console.log('connected')})
+
 
 var app = express();
 
@@ -14,14 +21,15 @@ app.engine('html', art_template);
 app.set('view engine', 'html');
 app.set('views', path.join(__dirname, 'views'));
 
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-
-app.use('/testcase', testcaseRouter);
+app.use('/public', express.static('public'))
+app.use(express.static('feature'))
+app.use('/feature', featureRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -36,7 +44,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error', {message: err.message, status:err.status});
 });
 
 module.exports = app;
