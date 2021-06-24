@@ -9,12 +9,12 @@ const obj = {
     //feature related
     addFeature: addFeature,
     findFeatures: findFeatures,
-    // updateFeature: updateFeature,
-    // deleteFeature: deleteFeature,
+    updateFeature: updateFeature,
+    removeFeature: removeFeature,
     // scenario related
     addScenario: addScenario,
-    // updateScenario: updateScenario,
-    // deleteScenario: deleteScenario,
+    updateScenario: updateScenario,
+    removeScenario: removeScenario,
     // getScenariosByFeature: getScenariosByFeature
 }
 
@@ -35,7 +35,7 @@ async function addFeature(data) {
 async function findFeatures(rules) {
     // find feature which parent is null
 
-    var  reqs =  await Requirement.find(rules).select(['id', 'title', '__t'])
+    var  reqs =  await Requirement.find(rules).select(['id', 'title', '__t']).sort({ 'title': 'asc' })
 
     console.log(reqs)
 
@@ -44,17 +44,51 @@ async function findFeatures(rules) {
         let data = { }
         data.id = doc.id
         data.text = doc.title
-        if(doc.type == 'feature')
+        if(doc.type == 'feature') {
             data.state = 'closed'
-        else
+            data.attributes = { 'type': 'feature' }
+            data.iconCls = 'tree-folder'
+        } else {
             data.state = 'open'
-        
-        data.attributes = { 'type': 'feature' }
+            data.attributes = { 'type': 'scenario' }
+            data.iconCls = 'tree-file'
+        }
         
         ret.push(data)
     })
 
     return ret
+}
+
+async function updateFeature(id, data) {
+
+    feature = await Feature.findById(id)
+
+    if(feature==null)
+        throw 'not found'
+
+    for(var attr in data) {
+        feature[attr] = data[attr]
+    }
+
+    await feature.save()
+
+    return feature.toJSON()
+}
+
+async function removeFeature(id) {
+
+    feature = await Feature.findByIdAndDelete(id)
+
+    if(feature != null) {
+
+        await Scenario.deleteMany({ 'parent': id })
+        return feature.toJSON()
+
+    } else {
+
+        return {}
+    }
 }
 
 async function addScenario(data) {
@@ -68,6 +102,36 @@ async function addScenario(data) {
     var doc = await new Scenario(data).save()
 
     return { id: doc.id, text: doc.title }
+}
+
+
+async function updateScenario(id, data) {
+
+    scenario = await Scenario.findById(id)
+
+    if(scenario==null)
+        throw 'not found'
+
+    for(var attr in data) {
+        scenario[attr] = data[attr]
+    }
+
+    await scenario.save()
+
+    return scenario.toJSON()
+}
+
+async function removeScenario(id) {
+
+    scenario = await Scenario.findByIdAndDelete(id)
+
+    if(scenario != null) {
+
+        return scenario.toJSON()
+    } else {
+
+        return { }
+    }
 }
 
 

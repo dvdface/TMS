@@ -17,8 +17,8 @@ db.on('open', () => { console.log('connected')})
 var app = express();
 
 // view engine setup
-app.engine('html', art_template);
-app.set('view engine', 'html');
+app.engine('art', art_template);
+app.set('view engine', 'art');
 app.set('views', path.join(__dirname, 'views'));
 
 

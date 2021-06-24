@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html class="panel-fit">
+  <head>
+    <style>
+      .easyui-layout {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .easyui-tabs,
+      .nav,
+      .content {
+        box-sizing: border-size;
+        height: 100%;
+      }
+
+      .nav {
+        width: 20%;
+        min-width: 350px;
+      }
+
+      .content {
+        width: 80%;
+      }
+    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <% include('./easyui.art') %>
+    <title>测试者桌面</title>
+  </head>
+  <body class="easyui-layout">
+    <div class="nav" region="west" data-options="split:true">
+      <% include('./nav.art') %>
+    </div>
+    <div class="content" region="center" data-options="fit:true">
+      <div class="easyui-tabs" data-options="fit:true"></div>
+    </div>
+  </body>
+</html>

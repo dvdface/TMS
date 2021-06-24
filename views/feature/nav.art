@@ -1,0 +1,162 @@
+<script type="text/javascript">
+
+  function obj2Str(obj) {
+
+    var ret = ''
+    for(var attr in obj) {
+      ret += attr + ':' + obj[attr] + '\n'
+    }
+
+    return ret
+  }
+
+  function addFeature() {
+    var t = $(".easyui-tree");
+    var node = t.tree("getSelected");
+    // create node on the server
+    var data = { text: "新特性", state: "closed", parent: node.id };
+    $.post("/feature/add_feature", data, function (data, textStatus, jqXHR) {
+      if (textStatus == "success") {
+        var nodeToAdd = {
+          id: data.id,
+          text: data.text,
+          state: "closed",
+          attributes: { type: "feature", parent: node.id },
+        };
+        t.tree("append", {
+          parent: node ? node.target : null,
+          data: nodeToAdd,
+        });
+        t.tree("collapse", node.target);
+        t.tree("expand", node.target);
+      }
+    }).fail(function() { $.messager.alert('警告','同步新增特性失败'); });
+  }
+
+  function addScenario() {
+    var t = $(".easyui-tree");
+    var node = t.tree("getSelected");
+    // create node on the server
+    var data = { text: "新场景", state: "open", parent: node.id };
+    $.post("/feature/add_scenario", data, function (data, textStatus, jqXHR) {
+      if (textStatus == "success") {
+        var nodeToAdd = {
+          id: data.id,
+          text: data.text,
+          state: "open",
+          attributes: { type: "scenario", parent: node.id },
+        };
+        t.tree("append", {
+          parent: node ? node.target : null,
+          data: nodeToAdd,
+        });
+        t.tree("collapse", node.target);
+        t.tree("expand", node.target);
+      }
+    }).fail(function() {  $.messager.alert('警告','同步新增场景失败'); });
+  }
+
+  function editFeature() {
+    editNode();
+  }
+
+  function editScenario() {
+    editNode();
+  }
+
+  function editNode() {
+    var t = $(".easyui-tree");
+    var node = t.tree("getSelected");
+    t.tree("beginEdit", node.target);
+  }
+
+  function delFeature() {
+    removeNode();
+  }
+
+  function delScenario() {
+    removeNode();
+  }
+
+  function removeNode() {
+    var t = $(".easyui-tree");
+    var node = t.tree("getSelected");
+    t.tree('remove', node.target)
+    $.post('/feature/remove_feature', { id: node.id }, function(data, textStatus, jqXHR) {
+
+    }).fail(function() { $.messager.alert('警告','同步删除操作失败');  });
+  }
+
+</script>
+
+<div id="featuremm" class="easyui-menu" style="width: 120px">
+  <div onclick="addFeature()" data-options="iconCls:'icon-add'">新增特性</div>
+  <div onclick="editFeature()" data-options="iconCls:'icon-edit'">编辑特性</div>
+  <div onclick="delFeature()" data-options="iconCls:'icon-remove'">
+    删除特性
+  </div>
+  <div class="menu-sep"></div>
+  <div onclick="addScenario()" data-options="iconCls:'icon-add'">新增场景</div>
+</div>
+<div id="scenariomm" class="easyui-menu" style="width: 120px">
+  <div onclick="editScenario()" data-options="iconCls:'icon-edit'">
+    编辑场景
+  </div>
+  <div onclick="delScenario()" data-options="iconCls:'icon-remove'">
+    删除场景
+  </div>
+</div>
+
+<div class="easyui-panel" title="特性列表"  data-options="tools:'#tt', fit:true">
+  <ul
+    class="easyui-tree"
+    data-options="
+        url: '/feature/get_features',
+        method: 'post',
+        onContextMenu: function(event,node) {
+
+            // turn off browser's context menu
+            event.preventDefault();
+
+            // select current node
+            $(this).tree('select', node.target);
+
+            if(node.attributes.type == undefined) {
+                // this node must have type in attributes
+                throw 'unkown node type'
+            } else if(node.attributes.type=='feature') {
+                // if feature node , display it as a dir
+                $('#featuremm').menu('show', { left: event.pageX, top: event.pageY })
+            } else {
+                // if scenario node, display it as file
+                $('#scenariomm').menu('show', { left: event.pageX, top: event.pageY })
+            }
+        },
+        onLoadSuccess: function(node, data) {
+            // expand root node
+            var t = $('.easyui-tree')
+
+            if(t.tree('getRoot'))
+                t.tree('expand', t.tree('getRoot').target)
+        },
+        onAfterEdit: function(node) {
+          // update text with given id
+          if(node.attributes.type == 'feature') {
+
+            $.post('/feature/update_feature', { id: node.id, title: node.text }, function () {
+
+            }).fail(function() { $('.easyui-window').window('open')  })
+
+          } else {
+
+            $.post('/feature/update_scenario', { id: node.id, title: node.text }, function () {
+
+            }).fail(function() { $('.easyui-window').window('open')  })
+          }
+        }
+        "></ul>
+</div>
+<div id="tt">
+	<a href="#" class="icon-add" onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('expandAll', t.tree('getSelected').target); else t.tree('expandAll')"></a>
+	<a href="#" class="icon-remove" onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('collapseAll', t.tree('getSelected').target); else t.tree('collapseAll')"></a>
+</div>
