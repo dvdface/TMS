@@ -14,7 +14,7 @@
     var t = $(".easyui-tree");
     var node = t.tree("getSelected");
     // create node on the server
-    var data = { text: "新特性", state: "closed", parent: node.id };
+    var data = { text: "新特性", state: "closed", parent: node.id }; //TODO:
     $.post("/feature/add_feature", data, function (data, textStatus, jqXHR) {
       if (textStatus == "success") {
         var nodeToAdd = {
@@ -37,7 +37,7 @@
     var t = $(".easyui-tree");
     var node = t.tree("getSelected");
     // create node on the server
-    var data = { text: "新场景", state: "open", parent: node.id };
+    var data = { text: "新场景", state: "open", parent: node.id };  //TODO:
     $.post("/feature/add_scenario", data, function (data, textStatus, jqXHR) {
       if (textStatus == "success") {
         var nodeToAdd = {
@@ -82,29 +82,29 @@
     var t = $(".easyui-tree");
     var node = t.tree("getSelected");
     t.tree('remove', node.target)
-    $.post('/feature/remove_feature', { id: node.id }, function(data, textStatus, jqXHR) {
+    if(node.attributes.type =='feature') {
+      $.post('/feature/remove_feature', { id: node.id }, function(data, textStatus, jqXHR) {
 
-    }).fail(function() { $.messager.alert('警告','同步删除操作失败');  });
+      }).fail(function() { $.messager.alert('警告','同步删除特性失败');  });
+    } else {
+      $.post('/feature/remove_scenario', { id: node.id }, function(data, textStatus, jqXHR) {
+
+      }).fail(function() { $.messager.alert('警告','同步删除场景失败');  });
+    }
   }
 
 </script>
 
 <div id="featuremm" class="easyui-menu" style="width: 120px">
+  <div onclick="addScenario()" data-options="iconCls:'icon-add'">新增场景</div>
+  <div class="menu-sep"></div>
   <div onclick="addFeature()" data-options="iconCls:'icon-add'">新增特性</div>
   <div onclick="editFeature()" data-options="iconCls:'icon-edit'">编辑特性</div>
-  <div onclick="delFeature()" data-options="iconCls:'icon-remove'">
-    删除特性
-  </div>
-  <div class="menu-sep"></div>
-  <div onclick="addScenario()" data-options="iconCls:'icon-add'">新增场景</div>
+  <div onclick="delFeature()" data-options="iconCls:'icon-remove'">删除特性</div>
 </div>
 <div id="scenariomm" class="easyui-menu" style="width: 120px">
-  <div onclick="editScenario()" data-options="iconCls:'icon-edit'">
-    编辑场景
-  </div>
-  <div onclick="delScenario()" data-options="iconCls:'icon-remove'">
-    删除场景
-  </div>
+  <div onclick="editScenario()" data-options="iconCls:'icon-edit'">编辑场景</div>
+  <div onclick="delScenario()" data-options="iconCls:'icon-remove'">删除场景</div>
 </div>
 
 <div class="easyui-panel" title="特性列表"  data-options="tools:'#tt', fit:true">
@@ -112,7 +112,7 @@
     class="easyui-tree"
     data-options="
         url: '/feature/get_features',
-        method: 'post',
+        method: 'get',
         onContextMenu: function(event,node) {
 
             // turn off browser's context menu
@@ -145,14 +145,64 @@
 
             $.post('/feature/update_feature', { id: node.id, title: node.text }, function () {
 
-            }).fail(function() { $('.easyui-window').window('open')  })
+            }).fail(function() { $.messager.alert('警告','同步特性名称失败'); })
 
           } else {
 
             $.post('/feature/update_scenario', { id: node.id, title: node.text }, function () {
 
-            }).fail(function() { $('.easyui-window').window('open')  })
+            }).fail(function() {  $.messager.alert('警告','同步场景名称失败');  })
           }
+        },
+        dnd:true,
+        onDragEnter: function(target, source) {
+          var node = $(this).tree('getNode', target)
+          if(node.attributes.type != 'feature')
+            return false
+          return true
+        },
+        onDrop: function(target, source, point) {
+
+          
+          alert(obj2Str(target))
+          alert(point)
+          // 获取父节点，把自己的parent指向父节点
+          var node = $(this).tree('getNode', target)
+          alert(obj2Str(node))
+          if(source.attributes.type == 'feature') {
+            $.post('/feature/update_feature', { id: source.id,  parent: node.id }, function() {
+                
+            }).fail(function() { $.messager.alert('警告','同步父节点信息失败'); })
+
+          } else if(source.attributes.type == 'scenario' ) {
+
+            $.post('/feature/update_scenario', { id: source.id,  parent: node.id }, function() {
+                
+            }).fail(function() { $.messager.alert('警告','同步父节点信息失败'); })
+              
+          } else {
+
+            alert('未知的节点类型')
+          }
+
+          // 获取父节点下的所有子节点，重新指定order顺序
+          node.children.forEach(function(item, index) {
+            if(source.attributes.type == 'feature') {
+              $.post('/feature/update_feature', { id: item.id,  order: index }, function() {
+                  
+              }).fail(function() { $.messager.alert('警告','同步节点顺序信息失败'); })
+
+            } else if(source.attributes.type == 'scenario' ) {
+
+              $.post('/feature/update_scenario', { id: item.id,  order: index }, function() {
+                  
+              }).fail(function() { $.messager.alert('警告','同步节点顺序信息失败'); })
+                
+            } else {
+
+              alert('未知的节点类型')
+            }
+          })
         }
         "></ul>
 </div>

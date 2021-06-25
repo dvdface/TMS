@@ -34,15 +34,6 @@ router.get("/get_features", (req, res) => {
   });
 });
 
-router.post("/get_features", (req, res) => {
-  if (req.body.id == undefined) rules = { parent: null };   // 如果是根节点
-  else if (req.body.id == "") res.status(200).json({});     // 如果是原始的空节点
-  else rules = { parent: req.body.id };
-
-  feature.findFeatures(rules).then((data) => {
-    res.status(200).json(data);
-  });
-});
 
 router.post("/update_feature", (req, res) => {
   if (req.body.id == undefined){
@@ -94,6 +85,7 @@ router.post("/remove_scenario", (req, res) => {
   } else {
 
     feature.removeScenario(req.body.id).then((data) => {
+
       res.status(200).json(data);
     })
   }

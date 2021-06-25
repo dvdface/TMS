@@ -81,6 +81,10 @@ const baseSchema = new Schema(
       ref: "feature",
       default: null,
     },
+    order: {
+      type: Number,
+      default: 0
+    }
   },
   options
 );

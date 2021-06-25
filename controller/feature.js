@@ -35,7 +35,7 @@ async function addFeature(data) {
 async function findFeatures(rules) {
     // find feature which parent is null
 
-    var  reqs =  await Requirement.find(rules).select(['id', 'title', '__t']).sort({ 'title': 'asc' })
+    var  reqs =  await Requirement.find(rules).select(['id', 'title', '__t']).sort({ 'order': 'asc', 'id': 'asc' })
 
     console.log(reqs)
 
@@ -68,7 +68,10 @@ async function updateFeature(id, data) {
         throw 'not found'
 
     for(var attr in data) {
+
+        console.log('start saving ' + attr)
         feature[attr] = data[attr]
+        console.log('finished saving ' + attr)
     }
 
     await feature.save()
@@ -113,7 +116,9 @@ async function updateScenario(id, data) {
         throw 'not found'
 
     for(var attr in data) {
+        console.log('start saving ' + attr)
         scenario[attr] = data[attr]
+        console.log('finished saving ' + attr)
     }
 
     await scenario.save()
