@@ -1,113 +1,271 @@
 <script type="text/javascript">
+  // fix icon display problem
+  function fixIcon(node) {
 
-  function obj2Str(obj) {
+    if(node.attributes.type == 'feature') {
+      
+      setClass(node, 'tree-folder', true)
+      setClass(node, 'tree-file', false)
+    
+    } else if (node.attributes.type == 'scenario') {
+      
+      setClass(node, 'tree-folder', false)
+      setClass(node, 'tree-file', true)
 
-    var ret = ''
-    for(var attr in obj) {
-      ret += attr + ':' + obj[attr] + '\n'
+    } else {
+
+      // do nothing
+    }
+  }
+
+  // save node's children order
+  function saveChildrenOrder(node) {
+    var t = $(".easyui-tree");
+
+    var children = t.tree("getChildren", node.target);
+
+    children.forEach(function (item, index) {
+      var id = item.id;
+      var order = index;
+      var type = item.attributes.type;
+
+      setLoadingState(item, true);
+      var url = null;
+      if (type == "feature") {
+        url = "/feature/update_feature";
+      } else if (type == "scenario") {
+        url = "/feature/update_scenario";
+      } else {
+        setErrorState(item, true);
+      }
+
+      $.post(url, { id: id, order: order }, function () {
+        setLoadingState(item, false);
+      }).fail(function () {
+        setErrorState(item, true);
+      });
+    });
+  }
+
+  // change parent
+  function setParent(childNode, parentNode) {
+    setLoadingState(childNode, true);
+    var url = null;
+    if (childNode.attributes.type == "feature") {
+      url = "/feature/update_feature";
+    } else if (childNode.attributes.type == "scenario") {
+      url = "/feature/update_scenario";
+    } else {
+      setErrorState(childNode, true);
+      return;
     }
 
-    return ret
+    $.post(url, { id: childNode.id, parent: parentNode.id }, function () {
+      setLoadingState(childNode, false);
+    }).fail(function () {
+      setErrorState(childNode, true);
+    });
   }
 
+  // add/remove cls for tree node
+  // true for add, false, for remove
+  function setClass(node, cls, state) {
+    if (typeof state != "boolean") throw "state need boolean type";
+
+    var id = node.domId;
+    if (state) {
+      $("#" + id + " span:nth-last-child(2)").addClass(cls);
+    } else {
+      $("#" + id + " span:nth-last-child(2)").removeClass(cls);
+    }
+  }
+
+  // set/unset error icon for tree node
+  function setErrorState(node, state) {
+    setClass(node, "tree-dnd-no", state);
+  }
+
+  // set/unset loading icon for tree node
+  function setLoadingState(node, state) {
+    setClass(node, "tree-loading", state);
+  }
+
+  // debug object
+  function debugObject(obj) {
+    var ret = "";
+    for (var attr in obj) {
+      ret += attr + ":" + obj[attr] + "\n";
+    }
+
+    return ret;
+  }
+
+  // addFeature
   function addFeature() {
     var t = $(".easyui-tree");
+    // get parent
     var node = t.tree("getSelected");
-    // create node on the server
-    var data = { text: "新特性", state: "closed", parent: node.id }; //TODO:
-    $.post("/feature/add_feature", data, function (data, textStatus, jqXHR) {
-      if (textStatus == "success") {
-        var nodeToAdd = {
-          id: data.id,
-          text: data.text,
-          state: "closed",
-          attributes: { type: "feature", parent: node.id },
-        };
-        t.tree("append", {
-          parent: node ? node.target : null,
-          data: nodeToAdd,
-        });
-        t.tree("collapse", node.target);
-        t.tree("expand", node.target);
+    // create a node under parent
+    var nodeData = {
+      text: "新特性",
+      state: "closed",
+      attributes: { type: "feature" },
+    };
+    t.tree("append", { parent: node ? node.target : null, data: [nodeData] });
+
+    // get new created node
+    var children = t.tree("getChildren", node);
+    var newAddedNode = children[children.length - 1];
+
+    // set new created node loading state on
+    setLoadingState(newAddedNode, true);
+    // create node on server
+    $.post(
+      "/feature/add_feature",
+      { text: "新特性", state: "closed", parent: node.id },
+      function (data, textStatus, jqXHR) {
+        if (textStatus == "success") {
+          // update local created node
+          // turn loading state off
+          setLoadingState(newAddedNode, false);
+          t.tree("update", {
+            target: newAddedNode.target,
+            id: data.id
+          });
+          // expand tree node
+          t.tree("collapse", node.target);
+          t.tree("expand", node.target);
+        }
       }
-    }).fail(function() { $.messager.alert('警告','同步新增特性失败'); });
+    ).fail(function () {
+      setErrorState(newAddedNode, true);
+    });
   }
 
+  // addScenario
   function addScenario() {
     var t = $(".easyui-tree");
-    var node = t.tree("getSelected");
-    // create node on the server
-    var data = { text: "新场景", state: "open", parent: node.id };  //TODO:
-    $.post("/feature/add_scenario", data, function (data, textStatus, jqXHR) {
-      if (textStatus == "success") {
-        var nodeToAdd = {
-          id: data.id,
-          text: data.text,
-          state: "open",
-          attributes: { type: "scenario", parent: node.id },
-        };
-        t.tree("append", {
-          parent: node ? node.target : null,
-          data: nodeToAdd,
-        });
-        t.tree("collapse", node.target);
-        t.tree("expand", node.target);
+    // get parent
+    var parent = t.tree("getSelected");
+    // create a node under parent
+    var nodeData = {
+      text: "新场景",
+      state: "open",
+      attributes: { type: "scenario" },
+    };
+    t.tree("append", { 'parent': parent ? parent.target : null, data: [nodeData] });
+
+    // get new created node
+    var children = t.tree("getChildren", parent.target); // fix #5
+    var newAddedNode = children[children.length - 1];
+
+    // set new created node loading state on
+    setLoadingState(newAddedNode, true);
+    // create node on server
+    $.post(
+      "/feature/add_scenario",
+      { text: "新场景", state: "open", parent: parent.id },
+      function (data, textStatus, jqXHR) {
+        if (textStatus == "success") {
+          // update local created node
+          // turn loading state off
+          setLoadingState(newAddedNode, false);
+          t.tree("update", {
+            target: newAddedNode.target,
+            id: data.id
+          });
+          // expand tree node
+          t.tree("collapse", parent.target);
+          t.tree("expand", parent.target);
+        }
       }
-    }).fail(function() {  $.messager.alert('警告','同步新增场景失败'); });
+    ).fail(function () {
+      setErrorState(newAddedNode, true);
+    });
   }
 
+  //editFeature
   function editFeature() {
     editNode();
   }
 
+  //editFeature
   function editScenario() {
     editNode();
   }
 
+  // beginEdit
   function editNode() {
     var t = $(".easyui-tree");
     var node = t.tree("getSelected");
     t.tree("beginEdit", node.target);
   }
 
-  function delFeature() {
+  // remove Feature
+  function removeFeature() {
     removeNode();
   }
 
-  function delScenario() {
+  // remove Scenario
+  function removeScenario() {
     removeNode();
   }
 
+  // remove Node
   function removeNode() {
+
     var t = $(".easyui-tree");
     var node = t.tree("getSelected");
-    t.tree('remove', node.target)
-    if(node.attributes.type =='feature') {
-      $.post('/feature/remove_feature', { id: node.id }, function(data, textStatus, jqXHR) {
+    var parent = t.tree("getParent", node.target)
 
-      }).fail(function() { $.messager.alert('警告','同步删除特性失败');  });
+    if(node==null) return;
+
+    setLoadingState(node, true);
+    var url = null;
+    if (node.attributes.type == "feature") {
+      url = "/feature/remove_feature";
+    } else if (node.attributes.type == "scenario") {
+      url = "/feature/remove_scenario";
     } else {
-      $.post('/feature/remove_scenario', { id: node.id }, function(data, textStatus, jqXHR) {
-
-      }).fail(function() { $.messager.alert('警告','同步删除场景失败');  });
+      setErrorState(node, true);
+      return;
     }
-  }
 
+    $.post(url, { id: node.id }, function (data, textStatus, jqXHR) {
+      if (textStatus == "success") {
+        setLoadingState(node, false);
+        t.tree("remove", node.target);
+        // if there is no children, parent node will be display as tree-file, so need to set icon
+        fixIcon(parent)
+      }
+    }).fail(function () {
+      setErrorState(node, true);
+    });
+  }
 </script>
 
+<div id="rootmm" class="easyui-menu" style="width: 120px">
+  <div onclick="addFeature()" data-options="iconCls:'icon-add'">新增特性</div>
+</div>
 <div id="featuremm" class="easyui-menu" style="width: 120px">
   <div onclick="addScenario()" data-options="iconCls:'icon-add'">新增场景</div>
   <div class="menu-sep"></div>
   <div onclick="addFeature()" data-options="iconCls:'icon-add'">新增特性</div>
   <div onclick="editFeature()" data-options="iconCls:'icon-edit'">编辑特性</div>
-  <div onclick="delFeature()" data-options="iconCls:'icon-remove'">删除特性</div>
+  <div onclick="removeFeature()" data-options="iconCls:'icon-remove'">
+    删除特性
+  </div>
 </div>
 <div id="scenariomm" class="easyui-menu" style="width: 120px">
-  <div onclick="editScenario()" data-options="iconCls:'icon-edit'">编辑场景</div>
-  <div onclick="delScenario()" data-options="iconCls:'icon-remove'">删除场景</div>
+  <div onclick="editScenario()" data-options="iconCls:'icon-edit'">
+    编辑场景
+  </div>
+  <div onclick="removeScenario()" data-options="iconCls:'icon-remove'">
+    删除场景
+  </div>
 </div>
 
-<div class="easyui-panel" title="特性列表"  data-options="tools:'#tt', fit:true">
+<div class="easyui-panel" title="特性列表" data-options="tools:'#tt', fit:true">
   <ul
     class="easyui-tree"
     data-options="
@@ -121,15 +279,22 @@
             // select current node
             $(this).tree('select', node.target);
 
-            if(node.attributes.type == undefined) {
-                // this node must have type in attributes
-                throw 'unkown node type'
-            } else if(node.attributes.type=='feature') {
-                // if feature node , display it as a dir
-                $('#featuremm').menu('show', { left: event.pageX, top: event.pageY })
+            // check if root node
+            if(node.id == $(this).tree('getRoot').id) {
+              $('#rootmm').menu('show', { left: event.pageX, top: event.pageY })
+              
             } else {
-                // if scenario node, display it as file
-                $('#scenariomm').menu('show', { left: event.pageX, top: event.pageY })
+
+              if(node.attributes.type == undefined) {
+                  // this node must have type in attributes
+                  throw 'unkown node type'
+              } else if(node.attributes.type=='feature') {
+                  // if feature node , display it as a dir
+                  $('#featuremm').menu('show', { left: event.pageX, top: event.pageY })
+              } else {
+                  // if scenario node, display it as file
+                  $('#scenariomm').menu('show', { left: event.pageX, top: event.pageY })
+              }
             }
         },
         onLoadSuccess: function(node, data) {
@@ -141,72 +306,65 @@
         },
         onAfterEdit: function(node) {
           // update text with given id
+          setLoadingState(node, true);
           if(node.attributes.type == 'feature') {
-
-            $.post('/feature/update_feature', { id: node.id, title: node.text }, function () {
-
-            }).fail(function() { $.messager.alert('警告','同步特性名称失败'); })
-
+            url = '/feature/update_feature'
           } else {
-
-            $.post('/feature/update_scenario', { id: node.id, title: node.text }, function () {
-
-            }).fail(function() {  $.messager.alert('警告','同步场景名称失败');  })
+            url = '/feature/update_scenario'
           }
+          
+          $.post(url, { id: node.id, title: node.text }, function () {
+            setLoadingState(node, false);
+          }).fail(function() { setErrorState(node, true);  })
         },
         dnd:true,
-        onDragEnter: function(target, source) {
-          var node = $(this).tree('getNode', target)
-          if(node.attributes.type != 'feature')
-            return false
-          return true
+        onBeforeDrop: function(target,source,point) {
+          var t = $('.easyui-tree');
+          var node = t.tree('getNode', target)
+          if(point =='append' && node.attributes.type == 'scenario')
+            return false;
+          else if ( (point == 'top' || point == 'bottom') && node.id == t.tree('getRoot').id) {
+            // prevent node dnd to be root's sibling
+            return false;
+          } else {
+            return true;
+          }
         },
         onDrop: function(target, source, point) {
+          var t = $('.easyui-tree');
+          var parent = null;
+          if(point == 'append') {
 
-          
-          alert(obj2Str(target))
-          alert(point)
-          // 获取父节点，把自己的parent指向父节点
-          var node = $(this).tree('getNode', target)
-          alert(obj2Str(node))
-          if(source.attributes.type == 'feature') {
-            $.post('/feature/update_feature', { id: source.id,  parent: node.id }, function() {
-                
-            }).fail(function() { $.messager.alert('警告','同步父节点信息失败'); })
+            parent = t.tree('getNode', target);
 
-          } else if(source.attributes.type == 'scenario' ) {
+          } else if(point == 'top' || point == 'bottom') {
 
-            $.post('/feature/update_scenario', { id: source.id,  parent: node.id }, function() {
-                
-            }).fail(function() { $.messager.alert('警告','同步父节点信息失败'); })
-              
+            var parent = t.tree('getParent', target);
+
           } else {
 
-            alert('未知的节点类型')
+            setErrorState(source, true);
+            return;
           }
 
-          // 获取父节点下的所有子节点，重新指定order顺序
-          node.children.forEach(function(item, index) {
-            if(source.attributes.type == 'feature') {
-              $.post('/feature/update_feature', { id: item.id,  order: index }, function() {
-                  
-              }).fail(function() { $.messager.alert('警告','同步节点顺序信息失败'); })
-
-            } else if(source.attributes.type == 'scenario' ) {
-
-              $.post('/feature/update_scenario', { id: item.id,  order: index }, function() {
-                  
-              }).fail(function() { $.messager.alert('警告','同步节点顺序信息失败'); })
-                
-            } else {
-
-              alert('未知的节点类型')
-            }
-          })
-        }
-        "></ul>
+          setParent(source, parent);
+          saveChildrenOrder(parent);
+          fixIcon(parent);
+          fixIcon(source);
+        }"
+  ></ul>
 </div>
 <div id="tt">
-	<a href="#" class="icon-add" onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('expandAll', t.tree('getSelected').target); else t.tree('expandAll')"></a>
-	<a href="#" class="icon-remove" onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('collapseAll', t.tree('getSelected').target); else t.tree('collapseAll')"></a>
+  <a
+    href="#"
+    title=""
+    class="icon-add"
+    onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('expandAll', t.tree('getSelected').target); else t.tree('expandAll')"
+  ></a>
+  <a
+    href="#"
+    title=""
+    class="icon-remove"
+    onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('collapseAll', t.tree('getSelected').target); else t.tree('collapseAll')"
+  ></a>
 </div>

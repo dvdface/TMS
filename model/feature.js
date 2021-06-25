@@ -84,6 +84,10 @@ const baseSchema = new Schema(
     order: {
       type: Number,
       default: 0
+    },
+    hidden: {
+      type: Boolean,
+      default: false
     }
   },
   options

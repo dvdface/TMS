@@ -20,9 +20,10 @@ const obj = {
 
 async function addFeature(data) {
 
-    if(!data.text)
-        throw 'add feature without title/text'
+    if(data.text == null || data.text == undefined) {
 
+        throw 'add feature without title/text'
+    }
     data.title = data.text
     delete data.text
     var feature =  new Feature(data)
@@ -36,8 +37,6 @@ async function findFeatures(rules) {
     // find feature which parent is null
 
     var  reqs =  await Requirement.find(rules).select(['id', 'title', '__t']).sort({ 'order': 'asc', 'id': 'asc' })
-
-    console.log(reqs)
 
     var ret = [ ]
     reqs.forEach(doc => {
@@ -69,29 +68,24 @@ async function updateFeature(id, data) {
 
     for(var attr in data) {
 
-        console.log('start saving ' + attr)
         feature[attr] = data[attr]
-        console.log('finished saving ' + attr)
     }
 
-    await feature.save()
+    var saved = await feature.save()
 
-    return feature.toJSON()
+    return saved.toJSON()
 }
 
 async function removeFeature(id) {
+    // hidden feature and children scenario instead of delete
 
-    feature = await Feature.findByIdAndDelete(id)
+    feature = await Feature.findByIdAndUpdate(id, {'hidden': true})
+    
+    if(feature==null)
+        throw 'not found'
 
-    if(feature != null) {
-
-        await Scenario.deleteMany({ 'parent': id })
-        return feature.toJSON()
-
-    } else {
-
-        return {}
-    }
+    await Scenario.updateMany({ 'parent': id }, {'hidden': true})
+    return feature.toJSON()
 }
 
 async function addScenario(data) {
@@ -116,27 +110,25 @@ async function updateScenario(id, data) {
         throw 'not found'
 
     for(var attr in data) {
-        console.log('start saving ' + attr)
+
         scenario[attr] = data[attr]
-        console.log('finished saving ' + attr)
     }
 
-    await scenario.save()
+    var saved = await scenario.save()
 
-    return scenario.toJSON()
+    return saved.toJSON()
 }
 
 async function removeScenario(id) {
+    // hidden scenario instead of delete
 
-    scenario = await Scenario.findByIdAndDelete(id)
+    scenario = await Scenario.findByIdAndUpdate(id, { 'hidden': true})
 
-    if(scenario != null) {
+    if(scenario == null)
+        throw 'not found'
 
-        return scenario.toJSON()
-    } else {
-
-        return { }
-    }
+    return scenario.toJSON()
+    
 }
 
 
