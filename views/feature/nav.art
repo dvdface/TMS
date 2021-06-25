@@ -104,25 +104,24 @@
   function addFeature() {
     var t = $(".easyui-tree");
     // get parent
-    var node = t.tree("getSelected");
+    var parent = t.tree("getSelected");
     // create a node under parent
     var nodeData = {
       text: "新特性",
       state: "closed",
       attributes: { type: "feature" },
     };
-    t.tree("append", { parent: node ? node.target : null, data: [nodeData] });
+    t.tree("append", { 'parent': parent ? parent.target : null, data: [nodeData] });
 
     // get new created node
-    var children = t.tree("getChildren", node);
+    var children = t.tree("getChildren", parent.target);
     var newAddedNode = children[children.length - 1];
-
     // set new created node loading state on
     setLoadingState(newAddedNode, true);
     // create node on server
     $.post(
       "/feature/add_feature",
-      { text: "新特性", state: "closed", parent: node.id },
+      { 'text': "新特性", 'state': "closed", 'parent': parent.id },
       function (data, textStatus, jqXHR) {
         if (textStatus == "success") {
           // update local created node
@@ -133,8 +132,8 @@
             id: data.id
           });
           // expand tree node
-          t.tree("collapse", node.target);
-          t.tree("expand", node.target);
+          t.tree("collapse", parent.target);
+          t.tree("expand", parent.target);
         }
       }
     ).fail(function () {
@@ -271,6 +270,7 @@
     data-options="
         url: '/feature/get_features',
         method: 'get',
+        lines:true,
         onContextMenu: function(event,node) {
 
             // turn off browser's context menu
@@ -309,10 +309,13 @@
           setLoadingState(node, true);
           if(node.attributes.type == 'feature') {
             url = '/feature/update_feature'
-          } else {
+          } else if(node.attributes.type == 'scenario') {
             url = '/feature/update_scenario'
+          } else {
+            // 节点类型未知
+            setErrorState(node, true); 
+            return;
           }
-          
           $.post(url, { id: node.id, title: node.text }, function () {
             setLoadingState(node, false);
           }).fail(function() { setErrorState(node, true);  })
@@ -357,13 +360,31 @@
 <div id="tt">
   <a
     href="#"
-    title=""
+    title="刷新"
+    class="icon-reload"
+    onclick="var t = $('.easyui-tree');t.tree('reload', t.tree('getRoot').target);"
+  ></a>
+  <a
+    href="#"
+    title="搜索"
+    class="icon-search"
+    onclick=""
+  ></a>
+  <a
+    href="#"
+    title="恢复"
+    class="icon-undo"
+    onclick=""
+  ></a>
+  <a
+    href="#"
+    title="展开"
     class="icon-add"
     onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('expandAll', t.tree('getSelected').target); else t.tree('expandAll')"
   ></a>
   <a
     href="#"
-    title=""
+    title="折叠"
     class="icon-remove"
     onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('collapseAll', t.tree('getSelected').target); else t.tree('collapseAll')"
   ></a>
