@@ -20,7 +20,7 @@
 
   // save node's children order
   function saveChildrenOrder(node) {
-    var t = $(".easyui-tree");
+    var t = $("#feature_tree");
 
     var children = t.tree("getChildren", node.target);
 
@@ -100,9 +100,17 @@
     return ret;
   }
 
+  function debugObjectAttr(obj) {
+    var ret = "";
+    for (var attr in obj) {
+      ret += attr +  "\n";
+    }
+    return ret;
+  }
+
   // addFeature
   function addFeature() {
-    var t = $(".easyui-tree");
+    var t = $("#feature_tree");
     // get parent
     var parent = t.tree("getSelected");
     // create a node under parent
@@ -143,7 +151,7 @@
 
   // addScenario
   function addScenario() {
-    var t = $(".easyui-tree");
+    var t = $("#feature_tree");
     // get parent
     var parent = t.tree("getSelected");
     // create a node under parent
@@ -195,7 +203,7 @@
 
   // beginEdit
   function editNode() {
-    var t = $(".easyui-tree");
+    var t = $("#feature_tree");
     var node = t.tree("getSelected");
     t.tree("beginEdit", node.target);
   }
@@ -213,7 +221,7 @@
   // remove Node
   function removeNode() {
 
-    var t = $(".easyui-tree");
+    var t = $("#feature_tree");
     var node = t.tree("getSelected");
     var parent = t.tree("getParent", node.target)
 
@@ -264,8 +272,9 @@
   </div>
 </div>
 
-<div class="easyui-panel" title="特性列表" data-options="tools:'#tt', fit:true">
+<div class="easyui-panel" title="特性列表" data-options="tools:'#tool', fit:true">
   <ul
+    id="feature_tree"
     class="easyui-tree"
     data-options="
         url: '/feature/get_features',
@@ -298,11 +307,6 @@
             }
         },
         onLoadSuccess: function(node, data) {
-            // expand root node
-            var t = $('.easyui-tree')
-
-            if(t.tree('getRoot'))
-                t.tree('expand', t.tree('getRoot').target)
         },
         onAfterEdit: function(node) {
           // update text with given id
@@ -322,7 +326,7 @@
         },
         dnd:true,
         onBeforeDrop: function(target,source,point) {
-          var t = $('.easyui-tree');
+          var t = $('#feature_tree');
           var node = t.tree('getNode', target)
           if(point =='append' && node.attributes.type == 'scenario')
             return false;
@@ -334,7 +338,7 @@
           }
         },
         onDrop: function(target, source, point) {
-          var t = $('.easyui-tree');
+          var t = $('#feature_tree');
           var parent = null;
           if(point == 'append') {
 
@@ -357,12 +361,12 @@
         }"
   ></ul>
 </div>
-<div id="tt">
+<div id="tool">
   <a
     href="#"
     title="刷新"
     class="icon-reload"
-    onclick="var t = $('.easyui-tree');t.tree('reload', t.tree('getRoot').target);"
+    onclick="var t = $('#feature_tree');t.tree('reload', t.tree('getRoot').target);"
   ></a>
   <a
     href="#"
@@ -380,12 +384,12 @@
     href="#"
     title="展开"
     class="icon-add"
-    onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('expandAll', t.tree('getSelected').target); else t.tree('expandAll')"
+    onclick="var t = $('#feature_tree');if(t.tree('getSelected')) t.tree('expandAll', t.tree('getSelected').target); else t.tree('expandAll')"
   ></a>
   <a
     href="#"
     title="折叠"
     class="icon-remove"
-    onclick="var t = $('.easyui-tree');if(t.tree('getSelected')) t.tree('collapseAll', t.tree('getSelected').target); else t.tree('collapseAll')"
+    onclick="var t = $('#feature_tree');if(t.tree('getSelected')) t.tree('collapseAll', t.tree('getSelected').target); else t.tree('collapseAll')"
   ></a>
 </div>

@@ -52,7 +52,6 @@ async function findFeatures(rules) {
             data.attributes = { 'type': 'scenario' }
             data.iconCls = 'tree-file'
         }
-        
         ret.push(data)
     })
 
