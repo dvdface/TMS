@@ -1,43 +1,16 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+// 使用type进行区分
 const options = {
   discriminatorKey: 'type',
   timestamps: true
 };
 
-function customValidator(re, value) {
-  let ret = true;
-  value.split("\n").forEach((item) => {
-    ret = ret && re.test(item);
-  });
 
-  return ret;
-}
 
-// use to validate Gherkin format
-function gherkinValidator(value) {
-  if (value == null) return true;
-
-  if (value == "") return true;
-
-  const re = /^\s*(given|when|then|and|as\s*a|i\s*want\s*to|so\s*that)/i;
-
-  return customValidator(re, value);
-}
-
-// used to validate Ghkerin parameters format
-function parameterValidator(value) {
-  if (value == null) return true;
-
-  if (value == "") return true;
-
-  const re = /^\s*\|(.*\|\s*)*$/;
-
-  return customValidator(re, value);
-}
-
-const TypeList = [
+// 质量属性
+const QualityList = [
   "Functionality",
   "Functionality-Suitability",
   "Functionality-Accuracy",
@@ -67,13 +40,13 @@ const TypeList = [
   "Portability-Replaceability",
 ];
 
+// 定义基础Schema
 const baseSchema = new Schema(
   {
     title: { type: String, required: true, trim: true },
     content: {
       type: String,
       trim: true,
-      validate: gherkinValidator,
       default: "",
     },
     parent: {
@@ -93,41 +66,33 @@ const baseSchema = new Schema(
   options
 );
 
+// Basic Schhema做为需求Model
 const Requirement = mongoose.model("requirement", baseSchema);
 
-const scenarioSchema = new Schema({
-  paramter: {
-    type: String,
-    trim: true,
-    validate: parameterValidator,
-    default: "",
-  },
-  priority: {
-    type: String,
-    trim: true,
-    match: /^\s*P\d+\s*$/,
-    default: "P0",
-  },
-  testtype: { type: String, trim: true, enum: TypeList },
-});
-
+// 基于基础Schema创建Feature Schema
 const Feature = Requirement.discriminator("feature", new Schema({}), options);
 
-// insert a default feature named '/'
+// 基于基础Schema创建Scenario Schema
+const scenarioSchema = new Schema({
+  quality: { type: String, trim: true, enum: QualityList },   // 多一个质量属性
+});
+
+const Scenario = Requirement.discriminator("scenario", scenarioSchema, options);
+
+// 首次使用，创建一个默认特性节点
 async function addDefaultFeature() {
 
-    var defaultFeature = await Feature.findOne({title: ''})
-    if(defaultFeature == null) {
+  var defaultFeature = await Feature.findOne({title: ''})
+  if(defaultFeature == null) {
 
-        await new Feature({title: '/', content: '', parent: null}).save()
-        await Feature.findOneAndUpdate({title:'/'}, {title: ''})
-      }
+      await new Feature({title: '/', content: '', parent: null}).save()
+      await Feature.findOneAndUpdate({title:'/'}, {title: ''})
+    }
 }
 
 addDefaultFeature()
 
-const Scenario = Requirement.discriminator("scenario", scenarioSchema, options);
-
+// 导出
 module.exports.Requirement = Requirement;
 module.exports.Feature = Feature;
 module.exports.Scenario = Scenario;

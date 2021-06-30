@@ -28,34 +28,13 @@ async function addFeature(data) {
     delete data.text
     var feature =  new Feature(data)
 
-    var doc =  await feature.save()
-
-    return { id: doc.id, text: doc.title }
+    return  await feature.save()
 }
 
 async function findFeatures(rules) {
+
     // find feature which parent is null
-
-    var  reqs =  await Requirement.find(rules).select(['id', 'title', '__t']).sort({ 'order': 'asc', 'id': 'asc' })
-
-    var ret = [ ]
-    reqs.forEach(doc => {
-        let data = { }
-        data.id = doc.id
-        data.text = doc.title
-        if(doc.type == 'feature') {
-            data.state = 'closed'
-            data.attributes = { 'type': 'feature' }
-            data.iconCls = 'tree-folder'
-        } else {
-            data.state = 'open'
-            data.attributes = { 'type': 'scenario' }
-            data.iconCls = 'tree-file'
-        }
-        ret.push(data)
-    })
-
-    return ret
+    return await Requirement.find(rules).sort({ 'order': 'asc', 'id': 'asc' })
 }
 
 async function updateFeature(id, data) {
@@ -115,7 +94,7 @@ async function updateScenario(id, data) {
 
     var saved = await scenario.save()
 
-    return saved.toJSON()
+    return saved
 }
 
 async function removeScenario(id) {

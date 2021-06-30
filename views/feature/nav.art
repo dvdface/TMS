@@ -1,5 +1,5 @@
 <script type="text/javascript">
-  // fix icon display problem
+  // 处理节点的显示问题
   function fixIcon(node) {
 
     if(node.attributes.type == 'feature') {
@@ -18,7 +18,7 @@
     }
   }
 
-  // save node's children order
+  // 保存子节点的顺序
   function saveChildrenOrder(node) {
     var t = $("#feature_tree");
 
@@ -47,7 +47,7 @@
     });
   }
 
-  // change parent
+  // 更新父节点
   function setParent(childNode, parentNode) {
     setLoadingState(childNode, true);
     var url = null;
@@ -67,8 +67,7 @@
     });
   }
 
-  // add/remove cls for tree node
-  // true for add, false, for remove
+  // 为节点设置/取消Class
   function setClass(node, cls, state) {
     if (typeof state != "boolean") throw "state need boolean type";
 
@@ -80,40 +79,22 @@
     }
   }
 
-  // set/unset error icon for tree node
+  // 为节点设置/取消错误图标
   function setErrorState(node, state) {
     setClass(node, "tree-dnd-no", state);
   }
 
-  // set/unset loading icon for tree node
+  // 为节点设置/取消加载图标
   function setLoadingState(node, state) {
     setClass(node, "tree-loading", state);
   }
 
-  // debug object
-  function debugObject(obj) {
-    var ret = "";
-    for (var attr in obj) {
-      ret += attr + ":" + obj[attr] + "\n";
-    }
-
-    return ret;
-  }
-
-  function debugObjectAttr(obj) {
-    var ret = "";
-    for (var attr in obj) {
-      ret += attr +  "\n";
-    }
-    return ret;
-  }
-
-  // addFeature
+  // 新增特性
   function addFeature() {
     var t = $("#feature_tree");
-    // get parent
+    // 获取当前节点
     var parent = t.tree("getSelected");
-    // create a node under parent
+    // 创建子节点
     var nodeData = {
       text: "新特性",
       state: "closed",
@@ -121,40 +102,41 @@
     };
     t.tree("append", { 'parent': parent ? parent.target : null, data: [nodeData] });
 
-    // get new created node
+    // 获取新创建的节点
     var children = t.tree("getChildren", parent.target);
     var newAddedNode = children[children.length - 1];
-    // set new created node loading state on
+    // 为新创建的节点设置加载图标
     setLoadingState(newAddedNode, true);
-    // create node on server
+    // 在服务器上创建节点
     $.post(
       "/feature/add_feature",
       { 'text': "新特性", 'state': "closed", 'parent': parent.id },
       function (data, textStatus, jqXHR) {
         if (textStatus == "success") {
-          // update local created node
-          // turn loading state off
+          // 创建成功，更新本地节点
+          // 关掉加载图标
           setLoadingState(newAddedNode, false);
           t.tree("update", {
             target: newAddedNode.target,
             id: data.id
           });
-          // expand tree node
+          // 把父节点展开和关闭一下
           t.tree("collapse", parent.target);
           t.tree("expand", parent.target);
         }
       }
     ).fail(function () {
+      // 创建失败设置错误图标
       setErrorState(newAddedNode, true);
     });
   }
 
-  // addScenario
+  // 新增场景
   function addScenario() {
     var t = $("#feature_tree");
-    // get parent
+    // 获取选中节点
     var parent = t.tree("getSelected");
-    // create a node under parent
+    // 创建本地场景节点
     var nodeData = {
       text: "新场景",
       state: "open",
@@ -162,63 +144,64 @@
     };
     t.tree("append", { 'parent': parent ? parent.target : null, data: [nodeData] });
 
-    // get new created node
+    // 获取创建的节点
     var children = t.tree("getChildren", parent.target); // fix #5
     var newAddedNode = children[children.length - 1];
 
-    // set new created node loading state on
+    // 设置加载图标
     setLoadingState(newAddedNode, true);
-    // create node on server
+    // 在服务器上面创建场景
     $.post(
       "/feature/add_scenario",
       { text: "新场景", state: "open", parent: parent.id },
       function (data, textStatus, jqXHR) {
         if (textStatus == "success") {
-          // update local created node
-          // turn loading state off
+          // 更新本地节点
+          // 关掉加载图标
           setLoadingState(newAddedNode, false);
           t.tree("update", {
             target: newAddedNode.target,
             id: data.id
           });
-          // expand tree node
+          // 展开父节点
           t.tree("collapse", parent.target);
           t.tree("expand", parent.target);
         }
       }
     ).fail(function () {
+      // 设置错误图标
       setErrorState(newAddedNode, true);
     });
   }
 
-  //editFeature
+  // 编辑特性
   function editFeature() {
     editNode();
   }
 
-  //editFeature
+  // 编辑场景
   function editScenario() {
     editNode();
   }
 
-  // beginEdit
+  // 开始编辑节点
   function editNode() {
     var t = $("#feature_tree");
     var node = t.tree("getSelected");
     t.tree("beginEdit", node.target);
   }
 
-  // remove Feature
+  // 删除特性
   function removeFeature() {
     removeNode();
   }
 
-  // remove Scenario
+  // 删除场景
   function removeScenario() {
     removeNode();
   }
 
-  // remove Node
+  // 删除节点
   function removeNode() {
 
     var t = $("#feature_tree");
@@ -328,6 +311,8 @@
         onBeforeDrop: function(target,source,point) {
           var t = $('#feature_tree');
           var node = t.tree('getNode', target)
+          if(node.id == null)
+            return false
           if(point =='append' && node.attributes.type == 'scenario')
             return false;
           else if ( (point == 'top' || point == 'bottom') && node.id == t.tree('getRoot').id) {

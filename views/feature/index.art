@@ -2,131 +2,17 @@
 <html class="panel-fit" lang="zh-Hans">
   <head>
     <% include('./easyui.art') %>
-    <style>
-      .easyui-layout {
-        width: 100vw;
-        height: 100vh;
-      }
-
-      #nav,
-      #content {
-        box-sizing: border-size;
-        height: 100%;
-      }
-
-      #nav {
-        width: 20%;
-        min-width: 350px;
-      }
-
-      #content {
-        width: 100vw;
-        height: 100vh;
-      }
-    </style>
-    <script type="text/javascript">
-
-    $(function()  {    
-
-      $(window).resize(function() {
-        $("#content").tabs("resize")
-      })
-
-      $("#content").tabs({ "onResize" : function(width, height) {
-        $("#content").tabs("resize")
-      }})
-    })
-
-    function existsTab(tabId) {
-
-        var content = $("#content")
-        var tabs = content.tabs("tabs")
-        for(let i=0; i<tabs.length; i++) {
-
-          if(tabs[i].panel("options").id == tabId) {
-            return content.tabs("getTabIndex", tabs[i]);
-          }
-        }
-
-        return -1;
-    }
-
-    function tabsContextFunction(e, title, index) {
-      e.preventDefault();
-      $(this).tabs('select', index);
-      $('#tabsmm').menu('show', { left: e.pageX, top: e.pageY })
-    }
-
-    function closeOtherTabs() {
-      var content = $("#content")
-      var tabs = content.tabs("tabs")
-      var selectedTab = content.tabs("getSelected")
-      var selectedIndex = content.tabs("getTabIndex", selectedTab)
-      // close from end to begin
-      for(let i=tabs.length-1; i>=0; i--) {
-        if(i != selectedIndex)
-          content.tabs("close", i)
-      }
-
-      // close from begin to end
-      for(let i=0; i<tabs.length-1; i++) {
-        content.tabs("close", i)
-      }
-    }
-
-    function closeAllTabs() {
-      var content = $("#content")
-      var tabs = content.tabs("tabs")
-      for(let i=tabs.length-1; i>=0; i--) {
-        content.tabs("close", i)
-      }
-    }
-
-    $(function() {
-      // monitor easyui-tree node onClick event
-      // when click, open a tab
-      $("#feature_tree").tree({
-        onClick: function(node) {
-
-          // don't open tab for root node
-          if(node.id == $(this).tree('getRoot').id)
-            return;
-
-          var title = node.text
-          var id = node.id
-
-          var content = $("#content")
-          var index = existsTab(id)
-          if(index == -1) {
-
-            content.tabs("add", {
-              'id': node.id,
-              'title': title,
-              'content': node.id,
-              'closable': true,
-              'selected': true
-            })
-          } else {
-
-            content.tabs("select", index)
-          }
-        } 
-      })
-    })
-    </script>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>测试者桌面</title>
   </head>
-  <body class="easyui-layout">
-    <div id="nav" region="west" data-options="split:true">
+  <body class="easyui-layout" data-options="fit:true">
+    <!--左侧的导航栏 -->
+    <div id="nav" region="west" data-options="split:true" style="width:25%;">
       <% include('./nav.art') %>
     </div>
-    <div id="content" class="easyui-tabs"  region="center" data-options="fit:true, onContextMenu:tabsContextFunction">
-    </div>
-    <div id="tabsmm" class="easyui-menu" style="width: 120px">
-      <div onclick="closeOtherTabs()" data-options="iconCls:'icon-add'">关闭其他窗口</div>
-      <div class="menu-sep"></div>
-      <div onclick="closeAllTabs()" data-options="iconCls:'icon-add'">关闭所有窗口</div>
+    <!--右侧的TAB页面 -->
+    <div id="content" region="center" data-options="fit:true" style="width:75%;">
+      <% include('./tabs.art') %>
     </div>
   </body>
 </html>

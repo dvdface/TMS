@@ -1,2 +1,264 @@
-<di class="easyui-form">
-</di>
+<style>
+    #form-container-{{_id.toString()}} {
+        width:calc(100%-20*2px);
+        max-width:900px;
+        margin:20px; 
+    }
+
+    .easyui-form {
+        width:calc(100%-40px);
+        margin:20px;
+        margin-top:10px;
+    }
+
+    .easyui-form div {
+        margin: 10px;
+    }
+
+    .easyui-linkbutton {
+        float: right;
+        margin-right: 0px;
+        margin-top:10px;
+        margin-bottom: 20px;
+    }
+
+</style>
+<script type="text/javascript">
+    // 设置combox数据
+    $(function() {
+        // 设置数据字段
+        var qualityCombox = $("#quality-{{_id.toString()}}");
+        if(qualityCombox!=null) {
+
+            qualityCombox.combobox({
+                'valueField': 'value',
+                'textField': 'text',
+                'groupField': 'group'
+            })
+
+            // 加载数据
+            qualityCombox.combobox('loadData', [
+                {
+                    'value':'Functionality-Suitability',
+                    'text': 'Suitability',
+                    'group':'Functionality'
+                }, {
+                    'value':'Functionality-Accuracy',
+                    'text': 'Accuracy',
+                    'group':'Functionality'
+                }, {
+                    'value':'Functionality-Interoperability',
+                    'text': 'Interoperability',
+                    'group':'Functionality'
+                }, {
+                    'value':'Functionality-Compliance',
+                    'text': 'Compliance',
+                    'group':'Functionality'
+                }, {
+                    'value':'Functionality-Security',
+                    'text': 'Security',
+                    'group':'Functionality'
+                }, {
+                    'value':'Reliability-Maturity',
+                    'text': 'Maturity',
+                    'group':'Reliability'
+                }, {
+                    'value':'Reliability-Fault Tolerance',
+                    'text': 'Fault Tolerance',
+                    'group':'Reliability'
+                }, {
+                    'value':'Reliability-Recoverability',
+                    'text': 'Recoverability',
+                    'group':'Reliability'
+                }, {
+                    'value':'Usability-Understandability',
+                    'text': 'Understandability',
+                    'group':'Usability'
+                }, {
+                    'value':'Usability-Learnability',
+                    'text': 'Learnability',
+                    'group':'Usability'
+                }, {
+                    'value':'Usability-Operability',
+                    'text': 'Operability',
+                    'group':'Usability'
+                }, {
+                    'value':'Efficiency-Time Behaviour',
+                    'text': 'Time Behaviour',
+                    'group':'Efficiency'
+                }, {
+                    'value':'Efficiency-Resource Behaviour',
+                    'text': 'Resource Behaviour',
+                    'group':'Efficiency'
+                }, {
+                    'value':'Maintainability-Analysability',
+                    'text': 'Analysability',
+                    'group':'Maintainability'
+                }, {
+                    'value':'Maintainability-Changeability',
+                    'text': 'Changeability',
+                    'group':'Maintainability'
+                }, {
+                    'value':'Maintainability-Stability',
+                    'text': 'Stability',
+                    'group':'Maintainability'
+                }, {
+                    'value':'Maintainability-Testability',
+                    'text': 'Testability',
+                    'group':'Maintainability'
+                }, {
+                    'value':'Portability-Adaptability',
+                    'text': 'Adaptability',
+                    'group':'Portability'
+                }, {
+                    'value':'Portability-Installability',
+                    'text': 'Installability',
+                    'group':'Portability'
+                }, {
+                    'value':'Portability-Conformance',
+                    'text': 'Conformance',
+                    'group':'Portability'
+                }, {
+                    'value':'Portability-Replaceability',
+                    'text': 'Replaceability',
+                    'group':'Portability'
+                }])
+            }
+    })
+
+    // 设置输入框的只读状态
+    function setReadonly_{{_id.toString()}}(state) {
+
+        if(typeof(state)!='boolean')
+            throw "wrong type"
+
+        if(state) {
+            $("#title-{{_id.toString()}}").textbox('disable')
+            $("#quality-{{_id.toString()}}").combobox('disable')
+            $("#content-{{_id.toString()}}").textbox('disable')
+        } else {
+            $("#title-{{_id.toString()}}").textbox('enable')
+            $("#quality-{{_id.toString()}}").combobox('enable')
+            $("#content-{{_id.toString()}}").textbox('enable')  
+        }
+    }
+
+    // 按钮响应
+    function editOrSave_{{_id.toString()}}() {
+
+        var btn = $("#submit-{{_id.toString()}}")
+
+        if(btn.linkbutton("options").text.localeCompare('编辑') == 0) {
+            // 当点击编辑按钮时
+
+            // 所有输入框可以编辑
+            setReadonly_{{_id.toString()}}(false);  
+            // 把按钮切换为保存
+            btn.linkbutton({ text: '保存', iconCls: 'icon-save'})
+            
+        } else if(btn.linkbutton("options").text.localeCompare('保存') == 0) {
+            // 当点击保存时
+
+            // 验证表单
+            var ff = $('#form-{{_id.toString()}}')
+            if(!ff.form("validate")) {
+                return
+            }
+            
+            // 禁止编辑
+            setReadonly_{{_id.toString()}}(true);
+
+            // 把按钮切换为保存中
+            btn.linkbutton('disable')
+            btn.linkbutton({ text: '保存...', iconCls: 'icon-save'})
+
+            // 提交更新
+
+            {{if type=='feature'}}
+            var url = '/feature/update_feature'
+            var param = {
+                id: '{{_id.toString()}}',
+                title: $("#title-{{_id.toString()}}").textbox('value'),
+                content: $("#content-{{_id.toString()}}").textbox('value'),
+            }
+            {{/if}}
+            {{if type=='scenario'}}
+            var url = '/feature/update_scenario'
+            var param = {
+                id: '{{_id.toString()}}',
+                title: $("#title-{{_id.toString()}}").textbox('getValue'),
+                quality: $("#quality-{{_id.toString()}}").combobox('getValue'),
+                content: $("#content-{{_id.toString()}}").textbox('getValue'),
+            }
+            {{/if}}
+            
+            $.post(url, param, function (data, textStatus, jqXHR) {
+                if (textStatus == "success") {
+                    // 使能按钮
+                    btn.linkbutton('enable')
+                    // 把按钮切换为 编辑
+                    btn.linkbutton({ text: '编辑', iconCls: 'icon-edit'})
+                }
+            }).fail(function () {
+                // 使能按钮
+                btn.linkbutton('enable')
+                // 把按钮切换为 保存
+                btn.linkbutton({ text: '保存', iconCls: 'icon-cancel'})
+            });
+
+        } else {
+
+            throw "unkown status:" + btn.text();
+        }
+    }
+</script>
+<div id="form-container-{{_id.toString()}}" class="easyui-panel" >
+    <form id="form-{{_id.toString()}}" class="easyui-form" method="post" data-options="novalidate:false">
+        <div>
+            <input id="title-{{_id.toString()}}" name="title" class="easyui-textbox" label="{{if type=="feature"}}特性标题{{/if}}{{if type=="scenario"}}场景标题{{/if}}" labelPosition="top" value="{{title}}" data-options="prompt:'标题应能清晰表达系统需要符合的行为特征',validType:'text', disabled:true" style="width:100%;">
+        </div>
+        {{if type=='scenario'}}
+        <div>
+            {{if quality=='' || quality == null}}
+            <select id="quality-{{_id.toString()}}"
+                    class="easyui-combobox"
+                    label="质量属性"
+                    labelPosition="top"
+                    name="quality" 
+                    data-options="validType:'text',
+                                  disabled:true"
+                    style="width:100%;">
+            </select>
+            {{/if}}
+            {{if quality!=null && quality!=''}}
+            <select id="quality-{{_id.toString()}}"
+                    class="easyui-combobox"
+                    label="质量属性"
+                    labelPosition="top"
+                    name="quality" 
+                    data-options="value:'{{quality}}',
+                                  validType:'text',
+                                  disabled:true"
+                    style="width:100%;">
+            </select>
+            {{/if}}
+        </div>
+        {{/if}}
+        <div>
+            <input id="content-{{_id.toString()}}"
+                class="easyui-textbox"
+                label="{{if type=="feature"}}特性描述{{/if}}{{if type=="scenario"}}场景描述{{/if}}"
+                labelPosition="top"
+                data-options="validType:'text',
+                            disabled:true,
+                            value:'{{content}}',
+                            prompt:'场景内容应当采用Given-When-Then格式进行描述:\n\n\tGiven 给定条件1\n\t\tAnd 给定条件2\n\tWhen 执行操作1\n\t\tAnd 执行操作2\n\tThen 预期结果1\n\t\tAnd 预期结果2\n\n\t参数A\t|\t参数B\n\t值1\t|\t值2\n\t值3\t|\t值4\n\n\nGWT格式详细介绍请参考: https://www.agilealliance.org/glossary/gwt/\n'"
+                name="content"
+                multiline="true"
+                style="width:100%;height:680px"/>
+        </div>
+        <div>
+            <a id="submit-{{_id.toString()}}" href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit'" onclick="editOrSave_{{_id.toString()}}()">编辑</a>
+        </div>
+    </form>
+</div>

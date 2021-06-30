@@ -1,0 +1,97 @@
+<script type="text/javascript">
+  $(function () {
+    // 监控#nav的点击事件，打开TAB窗口
+    $("#feature_tree").tree({
+      onClick: function (node) {
+        // 不为root节点打开tab
+        if (node.id == $(this).tree("getRoot").id) return;
+
+        // 其他情况正常处理
+        var title = node.text;
+        var id = node.id;
+
+        var tab = $("#tabs");
+
+        var index = getTabIndexById(id);
+        if (index == -1) {
+          // 如果找不到index，说明不存在，创建Tab
+          tab.tabs("add", {
+            id: node.id,
+            title: title,
+            closable: true,
+            selected: true,
+            width: "100%",
+            height: "100%",
+            loadingMessage: "正在加载...",
+            href: "feature/view_feature",
+            method: "get",
+            queryParams: { id: node.id }
+          });
+        } else {
+          // 否则，选中当前已经打开的Tab
+          tab.tabs("select", index);
+        }
+      },
+    });
+  });
+
+  // 根据id获取Index，存在返回index，不存在返回-1
+  function getTabIndexById(tabId) {
+    var tab = $("#tabs");
+    var tabs = tab.tabs("tabs");
+    for (let i = 0; i < tabs.length; i++) {
+      if (tabs[i].panel("options").id == tabId) {
+        return tab.tabs("getTabIndex", tabs[i]);
+      }
+    }
+
+    return -1;
+  }
+
+  // 显示Tab的上下文
+  function showTabContext(e, title, index) {
+    e.preventDefault();
+    $(this).tabs("select", index);
+    $("#tabsmm").menu("show", { left: e.pageX, top: e.pageY });
+  }
+
+  // 关闭其他Tab页
+  function closeOtherTabs() {
+    var tab = $("#tabs");
+    var tabs = tab.tabs("tabs");
+
+    // 获取选中的Tab的Index
+    var selectedTab = tab.tabs("getSelected");
+    var selectedIndex = tab.tabs("getTabIndex", selectedTab);
+
+    // 由于关闭Tab会影响Index, 所以必须采用如下算法
+    // 从尾部关闭到选中的Tab页(不含)
+    for (let i = tabs.length - 1; i >= 0; i--) {
+      if (i != selectedIndex) tab.tabs("close", i);
+    }
+
+    // 从头部关闭到选中的Tab页(不含)
+    for (let i = 0; i < tabs.length - 1; i++) {
+      tab.tabs("close", i);
+    }
+  }
+
+  // 关闭所有Tab页
+  function closeAllTabs() {
+    var tab = $("#tabs");
+    var tabs = tab.tabs("tabs");
+    // 由于关闭Tab会影响Index, 所以必须采从尾部关闭
+    for (let i = tabs.length - 1; i >= 0; i--) {
+      tab.tabs("close", i);
+    }
+  }
+</script>
+
+<!--TAB页面的容器-->
+<div id="tabs" class="easyui-tabs" data-options="fit:true, onContextMenu:showTabContext"></div>
+<!--TAB的上下文菜单 -->
+<div id="tabsmm" class="easyui-menu" style="width: 120px">
+  <div onclick="closeOtherTabs()" data-options="iconCls:'icon-add'">关闭其他窗口</div>
+  <div class="menu-sep"></div>
+  <div onclick="closeAllTabs()" data-options="iconCls:'icon-add'">关闭所有窗口</div>
+</div>
