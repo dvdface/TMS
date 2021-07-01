@@ -3,6 +3,20 @@ const router = express.Router();
 const feature = require("../controller/feature");
 const { Scenario } = require("../model/feature");
 
+// 对一些POST请求里面的特殊字符进行转义
+function escapePostRequest(req, res, next) {
+
+  for(var attr in req.body) {
+
+    req.body[attr] = req.body[attr].replaceAll('\n', '\\n')   // 对换行转义
+                                   .replaceAll("\r", "\\r'")  // 对回车转义
+                                   .replaceAll("'", "\\'")   // 对单引号转义
+                                   .replaceAll('"', '\\"');   // 对双引号转义
+  }
+
+  next();
+}
+
 router.get("/", (req, res) => {
 
   res.render("feature/index");
@@ -13,7 +27,7 @@ router.get("/nav", (req, res) => {
   res.render("feature/nav");
 });
 
-router.post("/add_scenario", (req, res) => {
+router.post("/add_scenario", escapePostRequest, (req, res) => {
 
   feature.addScenario(req.body).then((data) => {
 
@@ -24,7 +38,7 @@ router.post("/add_scenario", (req, res) => {
   });
 });
 
-router.post("/add_feature", (req, res) => {
+router.post("/add_feature", escapePostRequest, (req, res) => {
 
   feature.addFeature(req.body).then((data) => {
 
@@ -81,7 +95,7 @@ router.get("/get_features", (req, res) => {
 });
 
 
-router.post("/update_feature", (req, res) => {
+router.post("/update_feature", escapePostRequest, (req, res) => {
 
   if (req.body.id == undefined){
 
@@ -97,7 +111,7 @@ router.post("/update_feature", (req, res) => {
   }
 })
 
-router.post("/update_scenario", (req, res) => {
+router.post("/update_scenario", escapePostRequest, (req, res) => {
 
   if (req.body.id == undefined) {
 
@@ -106,6 +120,7 @@ router.post("/update_scenario", (req, res) => {
   } else {
     
     // find doc accroding to id
+    console.log(req.body.content)
     feature.updateScenario(req.body.id, req.body).then((data) => {
 
       res.status(200).json(data);
@@ -115,7 +130,7 @@ router.post("/update_scenario", (req, res) => {
 });
 
 
-router.post("/remove_feature", (req, res) => {
+router.post("/remove_feature", escapePostRequest, (req, res) => {
 
   if (req.body.id == undefined) {
 
@@ -130,7 +145,7 @@ router.post("/remove_feature", (req, res) => {
   }
 });
 
-router.post("/remove_scenario", (req, res) => {
+router.post("/remove_scenario", escapePostRequest, (req, res) => {
 
   if (req.body.id == undefined) {
 

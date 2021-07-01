@@ -200,6 +200,8 @@
                     btn.linkbutton({ text: '编辑', iconCls: 'icon-edit'})
                 }
             }).fail(function () {
+                //使能编辑
+                setReadonly_{{_id.toString()}}(false);
                 // 使能按钮
                 btn.linkbutton('enable')
                 // 把按钮切换为 保存
