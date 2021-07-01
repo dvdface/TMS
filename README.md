@@ -3,4 +3,4 @@
 
 
 目前完成的需求管理的基本功能：
-![image](https://user-images.githubusercontent.com/5211144/123942590-de895f80-d9cd-11eb-87f0-d68f9c2b1e48.png)
+![image](https://user-images.githubusercontent.com/5211144/124052825-be02e900-da51-11eb-9032-366420ab817b.png)
